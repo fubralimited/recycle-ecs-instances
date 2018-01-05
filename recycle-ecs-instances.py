@@ -46,7 +46,7 @@ def wait_for_ecs_count(wanted_count, ecs_cluster, poll_interval):
     while True:
         container_instances = ecs.list_container_instances(cluster=ecs_cluster)['containerInstanceArns']
         active_count = len(container_instances)
-        if active_count >= wanted_count:
+        if active_count == wanted_count:
             break
         sleep(poll_interval)
 
@@ -141,8 +141,7 @@ def main():
             InstanceId=container_instance['ec2InstanceId'],
             ShouldDecrementDesiredCapacity=False
         )
-        # It takes a little while for the terminated instance to be removed from the cluster.
-        sleep(POLL_INTERVAL)
+        wait_for_ecs_count(new_desired_capacity - 1, ECS_CLUSTER, POLL_INTERVAL)
 
     cleanup(ASG_NAME, pre_desired_capacity, pre_max_size)
 
