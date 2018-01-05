@@ -65,8 +65,8 @@ def cleanup(asg_name, desired_capacity, max_size):
         DesiredCapacity=desired_capacity
     )
 
-# AWS Lambda function entrypoint. Both arguments are ignored.
-def handler(event, context):
+# Main function.
+def main():
     # Pause processes we don't want to occur during recycle.
     autoscaling.suspend_processes(
         AutoScalingGroupName=ASG_NAME,
@@ -146,4 +146,5 @@ def handler(event, context):
 
     cleanup(ASG_NAME, pre_desired_capacity, pre_max_size)
 
-handler(False, False)
+if __name__  == '__main__':
+    main()
