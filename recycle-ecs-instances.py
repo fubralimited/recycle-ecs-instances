@@ -48,6 +48,7 @@ def wait_for_ecs_count(wanted_count, ecs_cluster, poll_interval):
         active_count = len(container_instances)
         if active_count == wanted_count:
             break
+        print('Current ECS instance count: {:d}/{:d}.'.format(active_count, wanted_count))
         sleep(poll_interval)
 
 # Cleans up the temporary modifications made to the auto scaling group.
@@ -92,6 +93,7 @@ def main():
         new_max_size = new_desired_capacity
 
     # Increase desired count of instances in ASG.
+    print('Increasing the ASG to {:d}.'.format(new_desired_capacity))
     autoscaling.update_auto_scaling_group(
         AutoScalingGroupName=ASG_NAME,
         MaxSize=new_max_size,
@@ -104,11 +106,13 @@ def main():
         i += 1
 
         # Wait for a new instance to join the ECS cluster.
+        print('Waiting for ECS count to reach {:d}.'.format(new_desired_capacity))
         wait_for_ecs_count(new_desired_capacity, ECS_CLUSTER, POLL_INTERVAL)
         # Just to be safe...
         sleep(POLL_INTERVAL)
 
         # Drain the instance.
+        print('Draining instance {:d}.'.format(i))
         ecs.update_container_instances_state(
             cluster=ECS_CLUSTER,
             containerInstances=[
@@ -118,6 +122,7 @@ def main():
         )
 
         # Wait for container instance to fully drain.
+        print('Waiting for instance to fully drain.')
         while True:
             container_instance = ecs.describe_container_instances(
                 cluster=ECS_CLUSTER,
@@ -137,12 +142,15 @@ def main():
             break
 
         # Terminate instance.
+        print('Terminating instance {:d}.'.format(i))
         autoscaling.terminate_instance_in_auto_scaling_group(
             InstanceId=container_instance['ec2InstanceId'],
             ShouldDecrementDesiredCapacity=False
         )
         wait_for_ecs_count(new_desired_capacity - 1, ECS_CLUSTER, POLL_INTERVAL)
+        print('Instance terminated.')
 
+    print('Cleaning up.')
     cleanup(ASG_NAME, pre_desired_capacity, pre_max_size)
 
 if __name__  == '__main__':
