@@ -1,4 +1,4 @@
-# recycle-asg
+# recycle-ecs-instances
 #
 # Recreates all instances in an ECS cluster that is managed with an auto scaling
 # group. It does this without any downtime to any running services.

@@ -1,4 +1,4 @@
-# recycle-asg
+# recycle-ecs-instances
 
 A script to recreate all container instances in an ECS cluster by utilising the
 autoscaling group.
@@ -11,7 +11,7 @@ autoscaling group.
 ## Usage
 
 ```
-python recycle-asg.py -h
+python recycle-ecs-instances.py -h
 ```
 
 ## License
