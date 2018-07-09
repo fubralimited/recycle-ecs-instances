@@ -78,9 +78,10 @@ def main():
     asg = get_asg(ASG_NAME)
 
     # Retreive current container instances.
-    pre_container_instance_arns = ecs.list_container_instances(
-        cluster=ECS_CLUSTER
-    )['containerInstanceArns']
+    pre_container_instance_arns = [d['containerInstanceArn'] for d in sorted(ecs.describe_container_instances(
+        cluster=ECS_CLUSTER,
+        containerInstances=ecs.list_container_instances(cluster=ECS_CLUSTER)['containerInstanceArns']
+    )['containerInstances'], key=lambda k: k['registeredAt'])]
 
     # Calculate new desired capacity.
     pre_desired_capacity = asg['DesiredCapacity']
